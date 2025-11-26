@@ -29,10 +29,7 @@ I got tired with semi-broken online keyboard testers, so here we are – one on 
 **note**: Default location of the installed binary is `$HOME/.cargo/bin`
 
 ### Homebrew
-
-```
-brew install kbt
-```
+`brew install kbt`
 
 **note**: During the first run you might need to grant Accessibility access.
 
