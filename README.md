@@ -31,7 +31,6 @@ I got tired with semi-broken online keyboard testers, so here we are – one on 
 ### Homebrew
 
 ```
-brew tap bloznelis/tap
 brew install kbt
 ```
 
