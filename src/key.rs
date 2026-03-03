@@ -131,25 +131,51 @@ impl Key {
     pub fn label(&self, lang: &KeyboardLang) -> String {
         match lang {
             KeyboardLang::US => self.to_string(),
-            // On Windows DE, the keyboard driver (KBDGR.DLL) remaps VK_OEM codes
-            // so each physical position sends a DIFFERENT VK code than on US.
-            // The labels here match Key variants to what the DE physical position
-            // actually produces via its remapped VK code.
-            KeyboardLang::DE => match self {
-                Key::Backslash => String::from("^"),             // ^-pos: VK_OEM_5 -> BackSlash
-                Key::LeftBracket => String::from("\u{00DF}"),    // ß-pos: VK_OEM_4 -> LeftBracket
-                Key::RightBracket => String::from("\u{00B4}"),   // ´-pos: VK_OEM_6 -> RightBracket
-                Key::SemiColon => String::from("\u{00FC}"),      // ü-pos: VK_OEM_1 -> Semicolon
-                Key::Equal => String::from("+*"),                // +-pos: VK_OEM_PLUS -> Equal
-                Key::QuestionMark => String::from("#'"),         // #-pos: VK_OEM_2 -> Slash
-                Key::Grave => String::from("\u{00F6}"),          // ö-pos: VK_OEM_3 -> Grave
-                Key::Apostrophe => String::from("\u{00E4}"),     // ä-pos: VK_OEM_7 (same)
-                Key::Comma => String::from(",;"),                // same VK
-                Key::Period => String::from(".:"),               // same VK
-                Key::Hyphen => String::from("-_"),               // --pos: VK_OEM_MINUS -> Hyphen
-                Key::IsoExtra => String::from("<>"),             // same VK
-                _ => self.to_string(),
-            },
+            KeyboardLang::DE => self.label_de(),
+        }
+    }
+
+    // On Windows, the German keyboard driver (KBDGR.DLL) remaps VK_OEM codes,
+    // so each physical position sends a DIFFERENT VK code than on US.
+    #[cfg(target_os = "windows")]
+    fn label_de(&self) -> String {
+        match self {
+            Key::Backslash => String::from("^"),             // ^-pos: VK_OEM_5 -> BackSlash
+            Key::LeftBracket => String::from("\u{00DF}"),    // ß-pos: VK_OEM_4 -> LeftBracket
+            Key::RightBracket => String::from("\u{00B4}"),   // ´-pos: VK_OEM_6 -> RightBracket
+            Key::SemiColon => String::from("\u{00FC}"),      // ü-pos: VK_OEM_1 -> Semicolon
+            Key::Equal => String::from("+*"),                // +-pos: VK_OEM_PLUS -> Equal
+            Key::QuestionMark => String::from("#'"),         // #-pos: VK_OEM_2 -> Slash
+            Key::Grave => String::from("\u{00F6}"),          // ö-pos: VK_OEM_3 -> Grave
+            Key::Apostrophe => String::from("\u{00E4}"),     // ä-pos: VK_OEM_7 (same)
+            Key::Comma => String::from(",;"),
+            Key::Period => String::from(".:"),
+            Key::Hyphen => String::from("-_"),               // --pos: VK_OEM_MINUS -> Hyphen
+            Key::IsoExtra => String::from("<>"),
+            _ => self.to_string(),
+        }
+    }
+
+    // On Linux/macOS, keycodes are position-based (scancodes), so Key variants
+    // match the US physical positions directly. Labels map position to DE character.
+    #[cfg(not(target_os = "windows"))]
+    fn label_de(&self) -> String {
+        match self {
+            Key::Grave => String::from("^"),
+            Key::Hyphen => String::from("\u{00DF}"),         // ß
+            Key::Equal => String::from("\u{00B4}"),          // ´
+            Key::LeftBracket => String::from("\u{00FC}"),    // ü
+            Key::RightBracket => String::from("+*"),
+            Key::Backslash => String::from("#'"),
+            Key::SemiColon => String::from("\u{00F6}"),      // ö
+            Key::Apostrophe => String::from("\u{00E4}"),     // ä
+            Key::Comma => String::from(",;"),
+            Key::Period => String::from(".:"),
+            Key::QuestionMark => String::from("-_"),
+            Key::IsoExtra => String::from("<>"),
+            Key::Y => String::from("Z"),                     // position-based: Y-scancode = Z on DE
+            Key::Z => String::from("Y"),                     // position-based: Z-scancode = Y on DE
+            _ => self.to_string(),
         }
     }
 }

@@ -1,14 +1,32 @@
 mod generic_backend;
 mod key;
 mod keyboard100;
-mod keyboard100_de;
 mod keyboard60;
-mod keyboard60_de;
 mod keyboard80;
-mod keyboard80_de;
 mod menu;
 mod model;
 mod view;
+
+// On Windows, DE layouts use remapped VK_OEM key variants (KBDGR.DLL).
+// On Linux/macOS, keycodes are position-based, so DE layouts use the same
+// Key variants as US (only physical layout differs: IsoExtra + smaller LeftShift).
+#[cfg(target_os = "windows")]
+mod keyboard60_de;
+#[cfg(not(target_os = "windows"))]
+#[path = "keyboard60_de_unix.rs"]
+mod keyboard60_de;
+
+#[cfg(target_os = "windows")]
+mod keyboard80_de;
+#[cfg(not(target_os = "windows"))]
+#[path = "keyboard80_de_unix.rs"]
+mod keyboard80_de;
+
+#[cfg(target_os = "windows")]
+mod keyboard100_de;
+#[cfg(not(target_os = "windows"))]
+#[path = "keyboard100_de_unix.rs"]
+mod keyboard100_de;
 
 use std::{
     collections::HashMap,

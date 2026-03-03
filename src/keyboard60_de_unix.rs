@@ -1,0 +1,393 @@
+// German (DE/ISO) 60% layout for Linux/macOS.
+// On these platforms, keycodes are position-based (scancodes), so OEM keys
+// use the same Key variants as the US layout. Only R1 differs physically
+// (smaller LeftShift + IsoExtra key). All DE-specific labels come from
+// Key::label() in key.rs.
+
+use crate::{key::Key, KeySize, KeyUI};
+
+pub const ROWS: [&[KeyUI]; 5] = [&R4, &R3, &R2, &R1, &R0];
+
+const R4: [KeyUI; 14] = [
+    KeyUI {
+        key: Key::Esc,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::One,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Two,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Three,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Four,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Five,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Six,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Seven,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Eight,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Nine,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Zero,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Hyphen,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Equal,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Backspace,
+        size: KeySize::U2,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+];
+
+const R3: [KeyUI; 14] = [
+    KeyUI {
+        key: Key::Tab,
+        size: KeySize::U15,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Q,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::W,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::E,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::R,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::T,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Y,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::U,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::I,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::O,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::P,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::LeftBracket,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::RightBracket,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Backslash,
+        size: KeySize::U15,
+        size_correction: Some(1),
+        vertical_key_part: None,
+    },
+];
+
+const R2: [KeyUI; 13] = [
+    KeyUI {
+        key: Key::CapsLock,
+        size: KeySize::U175,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::A,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::S,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::D,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::F,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::G,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::H,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::J,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::K,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::L,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::SemiColon,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Apostrophe,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Return,
+        size: KeySize::U250,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+];
+
+// Only R1 differs physically from the US layout: smaller LeftShift + IsoExtra key.
+// Note: Key::Z is here (not Key::Y) because Linux sends KEY_Z (scancode 44)
+// for the physical position left of X, matching the US Z position.
+const R1: [KeyUI; 13] = [
+    KeyUI {
+        key: Key::LeftShift,
+        size: KeySize::U1,
+        size_correction: Some(1),
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::IsoExtra,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Z,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::X,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::C,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::V,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::B,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::N,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::M,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Comma,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Period,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::QuestionMark,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::RightShift,
+        size: KeySize::U275,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+];
+
+const R0: [KeyUI; 7] = [
+    KeyUI {
+        key: Key::LeftCtrl,
+        size: KeySize::U15,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::LeftSuper,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::LeftAlt,
+        size: KeySize::U15,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::Spacebar,
+        size: KeySize::U675,
+        size_correction: Some(3),
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::RightAlt,
+        size: KeySize::U15,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::RightSuper,
+        size: KeySize::U1,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+    KeyUI {
+        key: Key::RightCtrl,
+        size: KeySize::U15,
+        size_correction: None,
+        vertical_key_part: None,
+    },
+];
