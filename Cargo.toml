@@ -11,7 +11,7 @@ keywords = ["terminal", "keyboard", "tester", "tui"]
 readme = "README.md"
 
 [dependencies]
-device_query_revamped = "2.2.1"
+device_query_revamped = { path = "libs/device_query_revamped" }
 ratatui = { version = "0.25.0", features = ["all-widgets"]}
 crossterm = "0.27"
 clap = { version = "4.4.7", features = ["derive"] }
