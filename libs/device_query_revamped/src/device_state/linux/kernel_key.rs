@@ -103,5 +103,6 @@ pub const KEY_PAGEDOWN: u16 = 109;
 pub const KEY_INSERT: u16 = 110;
 pub const KEY_DELETE: u16 = 111;
 pub const KEY_PAUSE: u16 = 119;
+pub const KEY_102ND: u16 = 86;
 pub const KEY_LEFTMETA: u16 = 125;
 pub const KEY_RIGHTMETA: u16 = 126;

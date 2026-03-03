@@ -231,6 +231,7 @@ impl DeviceState {
             kernel_key::KEY_COMMA => Some(Keycode::Comma),
             kernel_key::KEY_DOT => Some(Keycode::Dot),
             kernel_key::KEY_SLASH => Some(Keycode::Slash),
+            kernel_key::KEY_102ND => Some(Keycode::OEM102),
             _ => None,
         }
     }

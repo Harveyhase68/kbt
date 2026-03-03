@@ -74,7 +74,7 @@ fn draw_row(row_keys: &[KeyUI], state: &App, keyboard_rect: Rect, frame: &mut Fr
         let label = if let Some(VerticalKeyPart::Bottom) = ui_key.vertical_key_part {
             String::new()
         } else {
-            ui_key.key.to_string()
+            ui_key.key.label(&state.lang)
         };
 
         let text = Paragraph::new(label)

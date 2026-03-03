@@ -149,5 +149,6 @@ fn map_keycode(keycode: &Keycode) -> Key {
         Keycode::Scroll => Key::ScrollLock,
         Keycode::Print => Key::PrintScreen,
         Keycode::Pause => Key::PauseBreak,
+        Keycode::OEM102 => Key::IsoExtra,
     }
 }

@@ -7,51 +7,78 @@ use ratatui::{
     Frame, Terminal,
 };
 
-use crate::{KbtError, KeyboardSize, MenuResult};
+use crate::{KbtError, KeyboardLang, KeyboardSize, MenuResult};
 
-struct MenuState {
-    selections: Vec<KeyboardSize>,
+struct MenuState<T> {
+    selections: Vec<T>,
     cursor: usize,
 }
 
-impl Default for MenuState {
-    fn default() -> Self {
-        MenuState {
-            selections: vec![
-                KeyboardSize::Keyboard60,
-                KeyboardSize::Keyboard80,
-                KeyboardSize::Keyboard100,
-            ],
-            cursor: 0,
+enum SelectionResult<T> {
+    Selected(T),
+    Back,
+    Terminate,
+}
+
+pub fn run_menu<B: Backend>(terminal: &mut Terminal<B>) -> Result<MenuResult, KbtError> {
+    let sizes = vec![
+        KeyboardSize::Keyboard60,
+        KeyboardSize::Keyboard80,
+        KeyboardSize::Keyboard100,
+    ];
+    let langs = vec![KeyboardLang::US, KeyboardLang::DE];
+
+    loop {
+        let size = match run_selection(terminal, "kbt", &sizes, false)? {
+            SelectionResult::Selected(s) => s,
+            SelectionResult::Terminate | SelectionResult::Back => {
+                return Ok(MenuResult::Terminate)
+            }
+        };
+
+        match run_selection(terminal, "layout", &langs, true)? {
+            SelectionResult::Selected(l) => {
+                return Ok(MenuResult::KeyboardSelected(size, l));
+            }
+            SelectionResult::Back => continue,
+            SelectionResult::Terminate => return Ok(MenuResult::Terminate),
         }
     }
 }
 
-pub fn run_menu<B: Backend>(terminal: &mut Terminal<B>) -> Result<MenuResult, KbtError> {
-    let mut state = MenuState::default();
-    let max_selection_idx = state.selections.len() - 1;
+fn run_selection<B: Backend, T: ToString + Clone>(
+    terminal: &mut Terminal<B>,
+    title: &str,
+    items: &[T],
+    allow_back: bool,
+) -> Result<SelectionResult<T>, KbtError> {
+    let mut state = MenuState {
+        selections: items.to_vec(),
+        cursor: 0,
+    };
+    let max_idx = state.selections.len() - 1;
 
     loop {
-        terminal.draw(|f| view_menu(f, &state).expect("Failed to draw menu"))?;
+        terminal.draw(|f| view_menu(f, title, &state).expect("Failed to draw menu"))?;
 
         if let Event::Key(key) = event::read()? {
             match (key.kind, key.code) {
                 (KeyEventKind::Press, KeyCode::Up | KeyCode::Char('k')) => {
                     state.cursor = if state.cursor == 0 {
-                        max_selection_idx
+                        max_idx
                     } else {
                         state.cursor - 1
                     }
                 }
                 (KeyEventKind::Press, KeyCode::Down | KeyCode::Char('j')) => {
-                    state.cursor = if state.cursor == max_selection_idx {
+                    state.cursor = if state.cursor == max_idx {
                         0
                     } else {
                         state.cursor + 1
                     }
                 }
                 (KeyEventKind::Press, KeyCode::Enter) => {
-                    return Ok(MenuResult::KeyboardSelected(
+                    return Ok(SelectionResult::Selected(
                         state
                             .selections
                             .get(state.cursor)
@@ -61,9 +88,14 @@ pub fn run_menu<B: Backend>(terminal: &mut Terminal<B>) -> Result<MenuResult, Kb
                             .clone(),
                     ))
                 }
+                (KeyEventKind::Press, KeyCode::Esc) => {
+                    if allow_back {
+                        return Ok(SelectionResult::Back);
+                    }
+                }
                 (KeyEventKind::Press, KeyCode::Char('c') | KeyCode::Char('q')) => {
                     if key.modifiers == KeyModifiers::CONTROL {
-                        return Ok(MenuResult::Terminate);
+                        return Ok(SelectionResult::Terminate);
                     }
                 }
                 _ => {}
@@ -72,12 +104,18 @@ pub fn run_menu<B: Backend>(terminal: &mut Terminal<B>) -> Result<MenuResult, Kb
     }
 }
 
-fn view_menu(frame: &mut Frame, state: &MenuState) -> Result<(), KbtError> {
+fn view_menu<T: ToString>(
+    frame: &mut Frame,
+    title: &str,
+    state: &MenuState<T>,
+) -> Result<(), KbtError> {
     let items: Vec<ListItem> = state
         .selections
         .iter()
         .map(|selection| ListItem::new(selection.to_string()))
         .collect();
+
+    let item_count = items.len() as u16;
 
     let list = List::new(items)
         .block(Block::default().borders(Borders::NONE))
@@ -94,7 +132,7 @@ fn view_menu(frame: &mut Frame, state: &MenuState) -> Result<(), KbtError> {
 
     let terminal_size: Rect = frame.size();
 
-    let layout_height: u16 = 5;
+    let layout_height: u16 = 2 + item_count;
     let layout_width: u16 = 15;
     let left_padding: u16 = (terminal_size.width / 2) - (layout_width / 2);
     let top_padding: u16 = (terminal_size.height / 2) - (layout_height / 2);
@@ -103,24 +141,22 @@ fn view_menu(frame: &mut Frame, state: &MenuState) -> Result<(), KbtError> {
 
     let layout_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(2), Constraint::Length(2)].as_ref())
+        .constraints([Constraint::Length(2), Constraint::Length(item_count)].as_ref())
         .split(rect);
 
-    let title = Paragraph::new("kbt").style(
+    let title_widget = Paragraph::new(title).style(
         Style::default()
             .fg(Color::Green)
             .add_modifier(Modifier::ITALIC),
     );
 
-    // render title
     frame.render_widget(
-        title,
+        title_widget,
         *layout_chunks.get(0).ok_or(KbtError {
             message: String::from("Failed to get correct layout chunk for title"),
         })?,
     );
 
-    // render list
     frame.render_stateful_widget(
         list,
         *layout_chunks.get(1).ok_or(KbtError {

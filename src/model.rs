@@ -6,13 +6,13 @@ pub struct App {
     pub key_states: HashMap<Key, KeyState>,
     pub event_receiver: Receiver<AppEvent>,
     pub layout: KeyboardLayout,
+    pub lang: KeyboardLang,
 }
 
 pub struct KeyboardLayout {
     pub rows: Vec<Row>,
     pub height: u16,
     pub width: u16,
-    pub rows_count: u16,
 }
 
 pub struct Row {
@@ -83,8 +83,23 @@ impl KeySize {
 }
 
 pub enum MenuResult {
-    KeyboardSelected(KeyboardSize),
+    KeyboardSelected(KeyboardSize, KeyboardLang),
     Terminate,
+}
+
+#[derive(Clone)]
+pub enum KeyboardLang {
+    US,
+    DE,
+}
+
+impl Display for KeyboardLang {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            KeyboardLang::US => write!(f, "US (ANSI)"),
+            KeyboardLang::DE => write!(f, "DE (ISO)"),
+        }
+    }
 }
 
 pub enum KeyState {
@@ -128,6 +143,7 @@ impl Display for KeyboardSize {
 
 #[derive(Debug)]
 pub struct KbtError {
+    #[allow(dead_code)]
     pub message: String,
 }
 

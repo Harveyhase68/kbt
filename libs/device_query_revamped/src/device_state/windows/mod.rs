@@ -1,9 +1,50 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Once;
+
 use keymap::Keycode;
 use mouse_state::MouseState;
-use windows::Win32::Foundation::POINT;
+use windows::Win32::Foundation::{LPARAM, LRESULT, POINT, WPARAM};
 use windows::Win32::UI::Input::KeyboardAndMouse;
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VIRTUAL_KEY};
-use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+use windows::Win32::UI::WindowsAndMessaging::{
+    CallNextHookEx, GetCursorPos, GetMessageW, SetWindowsHookExW, KBDLLHOOKSTRUCT,
+    LLKHF_EXTENDED, MSG, WH_KEYBOARD_LL, WM_KEYDOWN, WM_SYSKEYDOWN,
+};
+
+/// Tracks whether the Numpad Enter key is currently held down.
+/// Updated by a global low-level keyboard hook, since both Enter keys
+/// share VK_RETURN and GetAsyncKeyState cannot distinguish them.
+static NUMPAD_ENTER_DOWN: AtomicBool = AtomicBool::new(false);
+static INIT_HOOK: Once = Once::new();
+
+unsafe extern "system" fn keyboard_hook_proc(
+    code: i32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+    if code >= 0 {
+        let kb = &*(lparam.0 as *const KBDLLHOOKSTRUCT);
+        if kb.vkCode == KeyboardAndMouse::VK_RETURN.0 as u32 {
+            let is_extended = kb.flags.0 & LLKHF_EXTENDED.0 != 0;
+            if is_extended {
+                let is_down =
+                    wparam.0 == WM_KEYDOWN as usize || wparam.0 == WM_SYSKEYDOWN as usize;
+                NUMPAD_ENTER_DOWN.store(is_down, Ordering::SeqCst);
+            }
+        }
+    }
+    CallNextHookEx(None, code, wparam, lparam)
+}
+
+fn ensure_hook_installed() {
+    INIT_HOOK.call_once(|| {
+        std::thread::spawn(|| unsafe {
+            let _hook = SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard_hook_proc), None, 0);
+            let mut msg = MSG::default();
+            while GetMessageW(&mut msg, None, 0, 0).as_bool() {}
+        });
+    });
+}
 
 #[derive(Debug, Clone)]
 pub struct DeviceState;
@@ -57,6 +98,7 @@ impl DeviceState {
     }
 
     pub fn query_keymap(&self) -> Vec<Keycode> {
+        ensure_hook_installed();
         let mut keycodes = vec![];
         let mut keymap = vec![];
         unsafe {
@@ -66,7 +108,15 @@ impl DeviceState {
         }
         for (ix, byte) in keymap.iter().enumerate() {
             if *byte as u32 & 0x8000 != 0 {
-                if let Some(k) = self.win_key_to_keycode(ix as u16) {
+                // VK_RETURN is shared by both Enter keys — use the hook state
+                // to distinguish regular Enter from Numpad Enter.
+                if VIRTUAL_KEY(ix as u16) == KeyboardAndMouse::VK_RETURN {
+                    if NUMPAD_ENTER_DOWN.load(Ordering::SeqCst) {
+                        keycodes.push(Keycode::NumpadEnter);
+                    } else {
+                        keycodes.push(Keycode::Enter);
+                    }
+                } else if let Some(k) = self.win_key_to_keycode(ix as u16) {
                     keycodes.push(k)
                 }
             }
@@ -116,7 +166,6 @@ impl DeviceState {
             KeyboardAndMouse::VK_RMENU => Some(Keycode::RAlt),
             KeyboardAndMouse::VK_LWIN => Some(Keycode::LMeta),
             KeyboardAndMouse::VK_RWIN => Some(Keycode::RMeta),
-            KeyboardAndMouse::VK_RETURN => Some(Keycode::Enter),
             KeyboardAndMouse::VK_ESCAPE => Some(Keycode::Escape),
             KeyboardAndMouse::VK_UP => Some(Keycode::Up),
             KeyboardAndMouse::VK_DOWN => Some(Keycode::Down),
@@ -142,6 +191,7 @@ impl DeviceState {
             KeyboardAndMouse::VK_OEM_COMMA => Some(Keycode::Comma),
             KeyboardAndMouse::VK_OEM_PERIOD => Some(Keycode::Dot),
             KeyboardAndMouse::VK_OEM_2 => Some(Keycode::Slash),
+            KeyboardAndMouse::VK_OEM_102 => Some(Keycode::OEM102),
 
             _ => None,
         };

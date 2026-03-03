@@ -1,8 +1,11 @@
 mod generic_backend;
 mod key;
 mod keyboard100;
+mod keyboard100_de;
 mod keyboard60;
+mod keyboard60_de;
 mod keyboard80;
+mod keyboard80_de;
 mod menu;
 mod model;
 mod view;
@@ -58,19 +61,28 @@ fn run() -> Result<(), KbtError> {
 
     match menu_result {
         MenuResult::Terminate => Ok(()),
-        MenuResult::KeyboardSelected(selection) => {
+        MenuResult::KeyboardSelected(selection, lang) => {
             let (sender, receiver): (Sender<AppEvent>, Receiver<AppEvent>) = channel();
             let (_up_guard, _down_guard) = GenericKeyBackend::subscribe(&sender);
             let handle = thread::spawn(move || listen_for_control(sender));
-            let layout = match &selection {
-                    KeyboardSize::Keyboard60 => {
+            let layout = match (&selection, &lang) {
+                    (KeyboardSize::Keyboard60, KeyboardLang::US) => {
                         prepare_layout(keyboard60::ROWS.map(|rows| rows.to_vec()).to_vec())
                     }
-                    KeyboardSize::Keyboard80 => {
+                    (KeyboardSize::Keyboard60, KeyboardLang::DE) => {
+                        prepare_layout(keyboard60_de::ROWS.map(|rows| rows.to_vec()).to_vec())
+                    }
+                    (KeyboardSize::Keyboard80, KeyboardLang::US) => {
                         prepare_layout(keyboard80::ROWS.map(|rows| rows.to_vec()).to_vec())
                     }
-                    KeyboardSize::Keyboard100 => {
+                    (KeyboardSize::Keyboard80, KeyboardLang::DE) => {
+                        prepare_layout(keyboard80_de::ROWS.map(|rows| rows.to_vec()).to_vec())
+                    }
+                    (KeyboardSize::Keyboard100, KeyboardLang::US) => {
                         prepare_layout(keyboard100::ROWS.map(|rows| rows.to_vec()).to_vec())
+                    }
+                    (KeyboardSize::Keyboard100, KeyboardLang::DE) => {
+                        prepare_layout(keyboard100_de::ROWS.map(|rows| rows.to_vec()).to_vec())
                     }
                 };
 
@@ -78,6 +90,7 @@ fn run() -> Result<(), KbtError> {
                 key_states: HashMap::new(),
                 event_receiver: receiver,
                 layout,
+                lang,
             };
 
             let res = run_keyboard(&mut terminal, initial_app);
@@ -100,8 +113,7 @@ fn run() -> Result<(), KbtError> {
 }
 
 fn prepare_layout(rows: Vec<Vec<KeyUI>>) -> KeyboardLayout {
-    let rows_count: u16 = u16::try_from(rows.len()).unwrap_or(0);
-    let height: u16 = rows_count * KEY_HEIGHT;
+    let height: u16 = u16::try_from(rows.len()).unwrap_or(0) * KEY_HEIGHT;
     let width: u16 = rows
         .iter()
         .map(|row| row.iter().map(|key| key.size.static_len()).sum())
@@ -120,7 +132,6 @@ fn prepare_layout(rows: Vec<Vec<KeyUI>>) -> KeyboardLayout {
         rows,
         height,
         width,
-        rows_count,
     }
 }
 

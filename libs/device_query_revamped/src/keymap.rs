@@ -117,6 +117,7 @@ pub enum Keycode {
     Comma,
     Dot,
     Slash,
+    OEM102,
 }
 
 impl FromStr for Keycode {
@@ -221,6 +222,7 @@ impl FromStr for Keycode {
             "Comma" => Ok(Self::Comma),
             "Dot" => Ok(Self::Dot),
             "Slash" => Ok(Self::Slash),
+            "OEM102" => Ok(Self::OEM102),
             _ => Err(String::from("failed to parse keycode")),
         }
     }

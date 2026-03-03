@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::model::KeyboardLang;
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Key {
     Q,
@@ -42,6 +44,7 @@ pub enum Key {
     Zero,
 
     // symbols
+    IsoExtra,
     Grave,
     Hyphen,
     Equal,
@@ -124,6 +127,33 @@ pub enum Key {
     NumpadNine,
 }
 
+impl Key {
+    pub fn label(&self, lang: &KeyboardLang) -> String {
+        match lang {
+            KeyboardLang::US => self.to_string(),
+            // On Windows DE, the keyboard driver (KBDGR.DLL) remaps VK_OEM codes
+            // so each physical position sends a DIFFERENT VK code than on US.
+            // The labels here match Key variants to what the DE physical position
+            // actually produces via its remapped VK code.
+            KeyboardLang::DE => match self {
+                Key::Backslash => String::from("^"),             // ^-pos: VK_OEM_5 -> BackSlash
+                Key::LeftBracket => String::from("\u{00DF}"),    // ß-pos: VK_OEM_4 -> LeftBracket
+                Key::RightBracket => String::from("\u{00B4}"),   // ´-pos: VK_OEM_6 -> RightBracket
+                Key::SemiColon => String::from("\u{00FC}"),      // ü-pos: VK_OEM_1 -> Semicolon
+                Key::Equal => String::from("+*"),                // +-pos: VK_OEM_PLUS -> Equal
+                Key::QuestionMark => String::from("#'"),         // #-pos: VK_OEM_2 -> Slash
+                Key::Grave => String::from("\u{00F6}"),          // ö-pos: VK_OEM_3 -> Grave
+                Key::Apostrophe => String::from("\u{00E4}"),     // ä-pos: VK_OEM_7 (same)
+                Key::Comma => String::from(",;"),                // same VK
+                Key::Period => String::from(".:"),               // same VK
+                Key::Hyphen => String::from("-_"),               // --pos: VK_OEM_MINUS -> Hyphen
+                Key::IsoExtra => String::from("<>"),             // same VK
+                _ => self.to_string(),
+            },
+        }
+    }
+}
+
 impl fmt::Display for Key {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -165,6 +195,7 @@ impl fmt::Display for Key {
             Key::PauseBreak => write!(f, "P/B"),
             Key::PrintScreen => write!(f, "Prn"),
             Key::ScrollLock => write!(f, "Lck"),
+            Key::IsoExtra => write!(f, "<>"),
             Key::Separator => write!(f, ""),
             Key::NumLock => write!(f, "NLck"),
             Key::Div => write!(f, "/"),
