@@ -1,7 +1,7 @@
 [package]
 name = "kbt"
-version = "2.1.0"
-authors = ["bloznelis <lukas.bloznelis@gmail.com>"]
+version = "2.1.1"
+authors = ["bloznelis <lukas.bloznelis@gmail.com>", "Harveyhase68 <office@predl.cc>"]
 description = "Keyboard tester in terminal"
 license = "MIT"
 homepage = "https://github.com/bloznelis/kbt"
@@ -9,6 +9,9 @@ repository = "https://github.com/bloznelis/kbt"
 edition = "2021"
 keywords = ["terminal", "keyboard", "tester", "tui"]
 readme = "README.md"
+
+[build-dependencies]
+winresource = "0.1"
 
 [dependencies]
 device_query_revamped = { path = "libs/device_query_revamped" }

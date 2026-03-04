@@ -13,13 +13,13 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libx11-dev 
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev
 
       - name: Run check
         run: make check
@@ -46,11 +46,11 @@ jobs:
 
           - build: windows
             os: windows-latest
-            target: x86_64-pc-windows-gnu
+            target: x86_64-pc-windows-msvc
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get the release version from the tag
         shell: bash
@@ -61,15 +61,12 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libx11-dev 
+      - name: Install dependencies (Linux)
+        if: matrix.build == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev
 
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: false
-          command: build
-          args: --verbose --release --target ${{ matrix.target }}
+        run: cargo build --verbose --release --target ${{ matrix.target }}
 
       - name: Build archive
         shell: bash
@@ -79,9 +76,9 @@ jobs:
           dirname="$binary_name-${{ env.VERSION }}-${{ matrix.target }}"
           mkdir "$dirname"
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            mv "target/${{ matrix.target }}/release/$binary_name.exe" "$dirname"
+            cp "target/${{ matrix.target }}/release/$binary_name.exe" "$dirname"
           else
-            mv "target/${{ matrix.target }}/release/$binary_name" "$dirname"
+            cp "target/${{ matrix.target }}/release/$binary_name" "$dirname"
           fi
 
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
@@ -92,8 +89,17 @@ jobs:
             echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
           fi
 
+      - name: Build Windows Installer
+        if: matrix.build == 'windows'
+        run: |
+          iscc setup\kbt.iss
+          $setupExe = Get-ChildItem -Path setup\Output\*.exe | Select-Object -First 1
+          echo "INSTALLER=$($setupExe.FullName)" >> $env:GITHUB_ENV
+          echo "INSTALLER_NAME=$($setupExe.Name)" >> $env:GITHUB_ENV
+
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{ env.ASSET }}
+            ${{ env.INSTALLER }}

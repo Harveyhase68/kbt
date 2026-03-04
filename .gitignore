@@ -1,7 +1,8 @@
+/.claude
 /target
 xmodmap
-/.claude
 CLAUDE.md
 kbt.code-workspace
 c.bat
 r.bat
+setup/Output/
